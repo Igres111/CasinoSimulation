@@ -1,5 +1,7 @@
 using DataAccess.Context;
 using Microsoft.EntityFrameworkCore;
+using Service.Implementations.UserRepositories;
+using Service.Interfaces.UserInterfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,9 +28,13 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(connection);
 });
 
+builder.Services.AddScoped<IUser, UserRepo>();
+
+
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+app.UseMiddleware<ExceptionMiddleware>();
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
