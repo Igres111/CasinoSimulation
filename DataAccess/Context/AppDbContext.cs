@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using DataAccess.Entities;
+﻿using DataAccess.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace DataAccess.Context
@@ -16,13 +11,14 @@ namespace DataAccess.Context
         public DbSet<DigitalItems> DigitalItems { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<TransactionHistory> TransactionHistories { get; set; }
+        public DbSet<RefreshToken> RefreshTokens { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<DigitalItems>()
                 .HasOne(d => d.User)
                 .WithMany(u => u.DigitalItems)
                 .HasForeignKey(d => d.UserId)
-                .OnDelete(DeleteBehavior.Restrict); 
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<TransactionHistory>()
                 .HasOne(th => th.User)
@@ -35,6 +31,13 @@ namespace DataAccess.Context
                 .WithMany(di => di.TransactionHistories)
                 .HasForeignKey(th => th.ItemId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<RefreshToken>()
+                .HasOne(rt => rt.User)
+                .WithMany(u => u.RefreshTokens)
+                .HasForeignKey(rt => rt.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
         }
 
     }

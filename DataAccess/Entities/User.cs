@@ -21,5 +21,6 @@ namespace DataAccess.Entities
         public int BonusPoints { get; set; }
         public List<DigitalItems> DigitalItems { get; set; }
         public List<TransactionHistory> TransactionHistories { get; set; }
+        public List<RefreshToken> RefreshTokens { get; set; }
     }
 }

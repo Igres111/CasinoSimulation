@@ -10,7 +10,6 @@ namespace DataAccess.Entities
     {
         public string Color { get; set; } = string.Empty;
         public string Rarity { get; set; } = string.Empty;
-        public decimal RNG_Ratio { get; set; }
         public string Code { get; set; } = string.Empty;
         public string? StoreProvider { get; set; } = string.Empty;
         public Guid UserId { get; set; }
