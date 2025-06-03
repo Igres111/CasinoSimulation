@@ -1,6 +1,8 @@
 using DataAccess.Context;
 using Microsoft.EntityFrameworkCore;
+using Service.Implementations.DigitalItemsRepositories;
 using Service.Implementations.UserRepositories;
+using Service.Interfaces.DigitalItemsInterfaces;
 using Service.Interfaces.UserInterfaces;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -29,8 +31,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 });
 
 builder.Services.AddScoped<IUser, UserRepo>();
-
-
+builder.Services.AddScoped<IDigitalItems, DigitalItemsRepo>();
 var app = builder.Build();
 
 app.UseMiddleware<ExceptionMiddleware>();

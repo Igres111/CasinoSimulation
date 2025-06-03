@@ -23,8 +23,4 @@
     <ProjectReference Include="..\Dtos\Dtos.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Implementations\DigitalItemsRepositories\" />
-  </ItemGroup>
-
 </Project>

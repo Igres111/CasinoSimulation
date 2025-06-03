@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Dtos.DigitalItemDto
 {
-    public class CreateDigitalItemDto
+    public class CreateDigitalItemsDto
     {
         public string Name { get; set; } = string.Empty;
         public string? Description { get; set; } = string.Empty;
