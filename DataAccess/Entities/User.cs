@@ -22,5 +22,6 @@ namespace DataAccess.Entities
         public List<DigitalItems> DigitalItems { get; set; } = new List<DigitalItems>();
         public List<TransactionHistory> TransactionHistories { get; set; } = new List<TransactionHistory>();
         public List<RefreshToken> RefreshTokens { get; set; }
+        public List<LootBox> LootBoxes { get; set; } = new List<LootBox>();
     }
 }

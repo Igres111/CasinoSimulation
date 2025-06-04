@@ -15,5 +15,6 @@ namespace DataAccess.Entities
         public Guid? UserId { get; set; } 
         public User? User { get; set; }
         public List<TransactionHistory> TransactionHistories { get; set; }
+        public List<LootBoxDigitalItem> LootBoxDigitalItems { get; set; } = new List<LootBoxDigitalItem>();
     }
 }
