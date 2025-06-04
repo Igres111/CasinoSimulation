@@ -1,8 +1,13 @@
+using System.Text;
 using DataAccess.Context;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Service.AuthToken;
 using Service.Implementations.DigitalItemsRepositories;
 using Service.Implementations.UserRepositories;
 using Service.Interfaces.DigitalItemsInterfaces;
+using Service.Interfaces.TokenInterfaces;
 using Service.Interfaces.UserInterfaces;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -31,7 +36,26 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 });
 
 builder.Services.AddScoped<IUser, UserRepo>();
+builder.Services.AddScoped<IToken, TokenLogic>();
 builder.Services.AddScoped<IDigitalItems, DigitalItemsRepo>();
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(x =>
+    {
+        x.TokenValidationParameters = new TokenValidationParameters
+        {
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key)),
+            ValidIssuer = builder.Configuration["JwtSettings:Issuer"],
+            ValidAudience = builder.Configuration["JwtSettings:Audience"],
+            ValidateIssuerSigningKey = true,
+            ValidateLifetime = true,
+            ValidateIssuer = true,
+            ValidateAudience = true,
+        };
+    });
+
+builder.Services.AddAuthorization();
+builder.Services.AddHttpClient();
 var app = builder.Build();
 
 app.UseMiddleware<ExceptionMiddleware>();
