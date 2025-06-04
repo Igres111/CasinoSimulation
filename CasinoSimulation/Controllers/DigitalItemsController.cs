@@ -9,21 +9,37 @@ namespace CasinoSimulation.Controllers
     [ApiController]
     public class DigitalItemsController : ControllerBase
     {
+        #region Fields
         public readonly IDigitalItems _digitalMethods;
+        #endregion
+
+        #region Constructor
         public DigitalItemsController(IDigitalItems digitalMethods)
         {
             _digitalMethods = digitalMethods;
         }
+        #endregion
 
-        [HttpPost("CreateDigitalItem")]
+        #region Methods
+
+        [HttpGet("GetAll")]
+        public async Task<IActionResult> GetAllDigitalItems()
+        {
+            var items = await _digitalMethods.GetAllDigitalItems();
+            return Ok(items);
+        }
+
+        [HttpPost("Create")]
         public async Task<IActionResult> CreateDigitalItem(CreateDigitalItemsDto digitalItem)
         {
-            if(!ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
             await _digitalMethods.CreateDigitalItem(digitalItem);
             return Ok("Digital item created successfully");
         }
+
+        #endregion
     }
 }

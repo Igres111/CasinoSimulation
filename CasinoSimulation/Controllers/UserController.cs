@@ -9,20 +9,30 @@ namespace CasinoSimulation.Controllers
     [ApiController]
     public class UserController : ControllerBase
     {
+        #region Fields
         public readonly IUser _userMethods;
+        #endregion
+
+        #region Constructor
         public UserController(IUser userMethods)
         {
             _userMethods = userMethods;
         }
-        [HttpPost("CreateUser")]
+        #endregion
+
+        #region Methods
+
+        [HttpPost("Create")]
         public async Task<IActionResult> CreateUser(CreateUserDto userInfo)
         {
             if (!ModelState.IsValid)
             {
-              return BadRequest("Wrong credentials");
+                return BadRequest("Wrong credentials");
             }
             await _userMethods.CreateUser(userInfo);
             return Ok("User created successfully");
         }
+
+        #endregion
     }
 }

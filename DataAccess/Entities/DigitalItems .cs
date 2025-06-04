@@ -12,7 +12,7 @@ namespace DataAccess.Entities
         public string Rarity { get; set; } = string.Empty;
         public string Code { get; set; } = string.Empty;
         public string? StoreProvider { get; set; } = string.Empty;
-        public Guid? UserId { get; set; }
+        public Guid? UserId { get; set; } 
         public User? User { get; set; }
         public List<TransactionHistory> TransactionHistories { get; set; }
     }

@@ -19,8 +19,8 @@ namespace DataAccess.Entities
         public int TotalBoxesOpened { get; set; }
         public decimal Balance { get; set; }
         public int BonusPoints { get; set; }
-        public List<DigitalItems> DigitalItems { get; set; }
-        public List<TransactionHistory> TransactionHistories { get; set; }
+        public List<DigitalItems> DigitalItems { get; set; } = new List<DigitalItems>();
+        public List<TransactionHistory> TransactionHistories { get; set; } = new List<TransactionHistory>();
         public List<RefreshToken> RefreshTokens { get; set; }
     }
 }

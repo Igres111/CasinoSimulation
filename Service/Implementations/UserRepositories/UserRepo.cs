@@ -1,22 +1,24 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using DataAccess.Context;
+﻿using DataAccess.Context;
 using DataAccess.Entities;
 using Dtos.UserDtos;
 using Service.Interfaces.UserInterfaces;
 
 namespace Service.Implementations.UserRepositories
 {
-    public class UserRepo: IUser
+    public class UserRepo : IUser
     {
+        #region Fields
         public readonly AppDbContext _context;
+        #endregion
+
+        #region Constructor
         public UserRepo(AppDbContext context)
         {
             _context = context;
         }
+        #endregion
+
+        #region Methods
 
         public async Task CreateUser(CreateUserDto userInfo)
         {
@@ -36,5 +38,7 @@ namespace Service.Implementations.UserRepositories
             _context.Users.Add(newUser);
             await _context.SaveChangesAsync();
         }
+
+        #endregion
     }
 }
