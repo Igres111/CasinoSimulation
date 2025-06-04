@@ -2,11 +2,12 @@
 using DataAccess.Entities;
 using Dtos.DigitalItemDto;
 using Microsoft.EntityFrameworkCore;
+using Service.Common;
 using Service.Interfaces.DigitalItemsInterfaces;
 
 namespace Service.Implementations.DigitalItemsRepositories
 {
-    public class DigitalItemsRepo : IDigitalItems
+    public class DigitalItemsRepo : APIResponse<string>, IDigitalItems
     {
         #region Fields
         public readonly AppDbContext _context;
@@ -21,12 +22,16 @@ namespace Service.Implementations.DigitalItemsRepositories
 
         #region Methods
 
-        public async Task CreateDigitalItem(CreateDigitalItemsDto digitalItem)
+        public async Task<APIResponse<string>> CreateDigitalItem(CreateDigitalItemsDto digitalItem)
         {
             var existItem = await _context.DigitalItems.FirstOrDefaultAsync(x => x.Name == digitalItem.Name && x.Delete == null);
             if (existItem != null)
             {
-                throw new Exception("Digital item already exists.");
+                return new APIResponse<string>
+                {
+                    Success = false,
+                    Error = "Digital item already exists."
+                };
             }
             var newDigitalItem = new DigitalItems
             {
@@ -44,16 +49,21 @@ namespace Service.Implementations.DigitalItemsRepositories
             };
             await _context.DigitalItems.AddAsync(newDigitalItem);
             await _context.SaveChangesAsync();
+            return new APIResponse<string>
+            {
+                Success = true,
+                Data = "Digital item created successfully."
+            };
         }
 
-        public async Task<List<DigitalItems>> GetAllDigitalItems()
+        public async Task<APIResponse<List<DigitalItems>>> GetAllDigitalItems()
         {
             var items = await _context.DigitalItems.Where(x => x.Delete == null).ToListAsync();
             if (items == null || items.Count == 0)
             {
-                throw new Exception("No digital items found.");
+                return new APIResponse<List<DigitalItems>> { Success = false, Error = "No digital items found." };
             }
-            return items;
+            return new APIResponse<List<DigitalItems>> { Success = true, Data = items };
         }
 
         #endregion

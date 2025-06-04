@@ -29,8 +29,8 @@ namespace CasinoSimulation.Controllers
             {
                 return BadRequest("Wrong credentials");
             }
-            await _userMethods.CreateUser(userInfo);
-            return Ok("User created successfully");
+            var result = await _userMethods.CreateUser(userInfo);
+            return Ok(result);
         }
 
         [HttpPost("LogIn")]

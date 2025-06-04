@@ -36,8 +36,8 @@ namespace CasinoSimulation.Controllers
             {
                 return BadRequest(ModelState);
             }
-            await _digitalMethods.CreateDigitalItem(digitalItem);
-            return Ok("Digital item created successfully");
+            var result = await _digitalMethods.CreateDigitalItem(digitalItem);
+            return Ok(result);
         }
 
         #endregion

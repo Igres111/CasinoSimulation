@@ -3,12 +3,13 @@ using DataAccess.Entities;
 using Dtos.UserDtos;
 using Microsoft.EntityFrameworkCore;
 using Service.AuthToken;
+using Service.Common;
 using Service.Interfaces.TokenInterfaces;
 using Service.Interfaces.UserInterfaces;
 
 namespace Service.Implementations.UserRepositories
 {
-    public class UserRepo : IUser
+    public class UserRepo : APIResponse<string>, IUser
     {
         #region Fields
         public readonly AppDbContext _context;
@@ -25,12 +26,12 @@ namespace Service.Implementations.UserRepositories
 
         #region Methods
 
-        public async Task CreateUser(CreateUserDto userInfo)
+        public async Task<APIResponse<string>> CreateUser(CreateUserDto userInfo)
         {
             var existUser = _context.Users.FirstOrDefault(u => u.Email == userInfo.Email && u.Delete == null);
             if (existUser != null)
             {
-                throw new Exception("User already exists.");
+               return new APIResponse<string> { Success = false, Error = "User already exists" };
             }
             var newUser = new User
             {
@@ -42,6 +43,7 @@ namespace Service.Implementations.UserRepositories
             };
             _context.Users.Add(newUser);
             await _context.SaveChangesAsync();
+            return new APIResponse<string> { Success = true };
         }
 
         public async Task<string> LogInUser(LogInUserDto userInfo)
@@ -49,17 +51,17 @@ namespace Service.Implementations.UserRepositories
             var userExists = await _context.Users.FirstOrDefaultAsync(x => x.Email == userInfo.Email);
             if (userExists == null)
             {
-                throw new Exception("User does not exist");
+                return new APIResponse<string> { Success = false, Error = "User does not exist" }.Error;
             }
             var passwordMatch = BCrypt.Net.BCrypt.Verify(userInfo.Password, userExists.Password);
             if (!passwordMatch)
             {
-                throw new Exception("Password is incorrect");
+                return new APIResponse<string> { Success = false, Error = "Password is incorrect" }.Error;
             }
             var refreshToken = await _tokenLogic.CreateRefreshTokenAsync(userExists);
             var accessToken = _tokenLogic.CreateAccessToken(userExists);
             await _context.SaveChangesAsync();
-            return accessToken;
+            return new APIResponse<string> { Success = true, Data = accessToken }.Data;
         }
 
         #endregion
