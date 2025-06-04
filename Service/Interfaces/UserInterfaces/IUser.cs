@@ -10,5 +10,6 @@ namespace Service.Interfaces.UserInterfaces
     public interface IUser
     {
         public Task CreateUser(CreateUserDto userInfo);
+        public Task<string> LogInUser(LogInUserDto userInfo);
     }
 }

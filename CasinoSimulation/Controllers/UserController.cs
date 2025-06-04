@@ -33,6 +33,16 @@ namespace CasinoSimulation.Controllers
             return Ok("User created successfully");
         }
 
+        [HttpPost("LogIn")]
+        public async Task<IActionResult> LogInUser(LogInUserDto userInfo)
+        {
+            if(!ModelState.IsValid)
+            {
+                return BadRequest("Wrong credentials");
+            }
+            var result = await _userMethods.LogInUser(userInfo);
+            return Ok(result);
+        }
         #endregion
     }
 }
