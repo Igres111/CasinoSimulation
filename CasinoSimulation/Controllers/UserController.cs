@@ -1,6 +1,8 @@
 ﻿using Dtos.UserDtos;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Service.AuthToken;
+using Service.Interfaces.TokenInterfaces;
 using Service.Interfaces.UserInterfaces;
 
 namespace CasinoSimulation.Controllers
@@ -11,12 +13,14 @@ namespace CasinoSimulation.Controllers
     {
         #region Fields
         public readonly IUser _userMethods;
+        public readonly IToken _tokenLogic;
         #endregion
 
         #region Constructor
-        public UserController(IUser userMethods)
+        public UserController(IUser userMethods, IToken tokenLogic)
         {
             _userMethods = userMethods;
+            _tokenLogic = tokenLogic;
         }
         #endregion
 
@@ -43,6 +47,14 @@ namespace CasinoSimulation.Controllers
             var result = await _userMethods.LogInUser(userInfo);
             return Ok(result);
         }
+
+        [HttpPost("refresh-access-token")]
+        public async Task<IActionResult> RefreshToken(string token)
+        {
+            var result = await _tokenLogic.RefreshAccessTokenAsync(token);
+            return Ok(result);
+        }
+
         #endregion
     }
 }

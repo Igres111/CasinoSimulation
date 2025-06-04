@@ -46,22 +46,24 @@ namespace Service.Implementations.UserRepositories
             return new APIResponse<string> { Success = true };
         }
 
-        public async Task<string> LogInUser(LogInUserDto userInfo)
+        public async Task<APIResponse<string>> LogInUser(LogInUserDto userInfo)
         {
-            var userExists = await _context.Users.FirstOrDefaultAsync(x => x.Email == userInfo.Email);
+            var userExists = await _context.Users
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.Email == userInfo.Email);
             if (userExists == null)
             {
-                return new APIResponse<string> { Success = false, Error = "User does not exist" }.Error;
+                return new APIResponse<string> { Success = false, Error = "User does not exist" };
             }
             var passwordMatch = BCrypt.Net.BCrypt.Verify(userInfo.Password, userExists.Password);
             if (!passwordMatch)
             {
-                return new APIResponse<string> { Success = false, Error = "Password is incorrect" }.Error;
+                return new APIResponse<string> { Success = false, Error = "Password is incorrect" };
             }
             var refreshToken = await _tokenLogic.CreateRefreshTokenAsync(userExists);
             var accessToken = _tokenLogic.CreateAccessToken(userExists);
             await _context.SaveChangesAsync();
-            return new APIResponse<string> { Success = true, Data = accessToken }.Data;
+            return new APIResponse<string> { Success = true, Data = accessToken };
         }
 
         #endregion
