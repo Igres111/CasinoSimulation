@@ -1,5 +1,4 @@
 ﻿using Dtos.DigitalItemDto;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Service.Interfaces.DigitalItemsInterfaces;
 
@@ -22,6 +21,7 @@ namespace CasinoSimulation.Controllers
 
         #region Methods
 
+        //[Authorize(Roles = "Admin")]
         [HttpGet("GetAll")]
         public async Task<IActionResult> GetAllDigitalItems()
         {
@@ -29,6 +29,7 @@ namespace CasinoSimulation.Controllers
             return Ok(items);
         }
 
+        //[Authorize(Roles = "Admin")]
         [HttpPost("Create")]
         public async Task<IActionResult> CreateDigitalItem(CreateDigitalItemsDto digitalItem)
         {

@@ -5,8 +5,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Service.AuthToken;
 using Service.Implementations.DigitalItemsRepositories;
+using Service.Implementations.LootBoxRepositories;
 using Service.Implementations.UserRepositories;
 using Service.Interfaces.DigitalItemsInterfaces;
+using Service.Interfaces.LootBoxInterfaces;
 using Service.Interfaces.TokenInterfaces;
 using Service.Interfaces.UserInterfaces;
 
@@ -38,6 +40,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddScoped<IUser, UserRepo>();
 builder.Services.AddScoped<IToken, TokenLogic>();
 builder.Services.AddScoped<IDigitalItems, DigitalItemsRepo>();
+builder.Services.AddScoped<ILootBox,LootBoxRepo>();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(x =>
