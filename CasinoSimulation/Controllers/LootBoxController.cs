@@ -1,5 +1,4 @@
 ﻿using Dtos.LootBoxDto;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Service.Interfaces.LootBoxInterfaces;
 
@@ -17,8 +16,15 @@ namespace CasinoSimulation.Controllers
         [HttpPost("Create")]
         public async Task<IActionResult> CreateLootBox(CreateLootBoxDto lootInfo)
         {
-          var result =  await _lootBoxMethods.CreateLootBox(lootInfo);
-          return Ok(result);
+            var result = await _lootBoxMethods.CreateLootBox(lootInfo);
+            return Ok(result);
         }
+        [HttpGet("GetAll")]
+        public async Task<IActionResult> GetAllLootBox()
+        {
+            var result = await _lootBoxMethods.GetAllLootBox();
+            return Ok(result);
+        }
+
     }
 }

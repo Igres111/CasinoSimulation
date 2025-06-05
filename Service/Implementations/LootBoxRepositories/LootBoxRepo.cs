@@ -57,5 +57,27 @@ namespace Service.Implementations.LootBoxRepositories
                 Data = "LootBox created successfully."
             };
         }
+
+        public async Task<APIResponse<List<GetAllLootBoxDto>>> GetAllLootBox()
+        {
+            var lootBoxes = await _context.LootBoxes
+                .Where(x => x.Delete == null)
+                .Select(x => new GetAllLootBoxDto
+            {
+                Id = x.Id,
+                Name = x.Name,
+                Price = x.Price,
+                Quantity = x.Quantity,
+            }).ToListAsync();
+            if(lootBoxes.Count == 0)
+            {
+                return new APIResponse<List<GetAllLootBoxDto>> { Success = false, Error = "No loot boxes found." };
+            }
+            return new APIResponse<List<GetAllLootBoxDto>>
+            {
+                Success = true,
+                Data = lootBoxes,
+            };
+        }
     }
 }
