@@ -14,13 +14,24 @@ using Service.Interfaces.LootBoxInterfaces;
 namespace Service.Implementations.LootBoxRepositories
 {
     public class LootBoxRepo : ILootBox
-
     {
+        #region Fields
+
         public readonly AppDbContext _context;
+
+        #endregion
+
+        #region Constructor
+
         public LootBoxRepo(AppDbContext context)
         {
             _context = context;
         }
+
+        #endregion
+
+        #region Public Methods
+
         public async Task<APIResponse<string>> CreateLootBox(CreateLootBoxDto lootInfo)
         {
             var existItem = _context.DigitalItems.Any(x => lootInfo.DigitalItemId.Contains(x.Id));
@@ -64,13 +75,13 @@ namespace Service.Implementations.LootBoxRepositories
             var lootBoxes = await _context.LootBoxes
                 .Where(x => x.Delete == null)
                 .Select(x => new GetAllLootBoxDto
-            {
-                Id = x.Id,
-                Name = x.Name,
-                Price = x.Price,
-                Quantity = x.Quantity,
-            }).ToListAsync();
-            if(lootBoxes.Count == 0)
+                {
+                    Id = x.Id,
+                    Name = x.Name,
+                    Price = x.Price,
+                    Quantity = x.Quantity,
+                }).ToListAsync();
+            if (lootBoxes.Count == 0)
             {
                 return new AllLootBoxResponse { Success = false, Error = "No loot boxes found." };
             }
@@ -80,6 +91,7 @@ namespace Service.Implementations.LootBoxRepositories
                 LootBoxes = lootBoxes,
             };
         }
+
         public async Task<LootBoxItemsResponse> GetLootBoxItems(Guid lootBoxId)
         {
             var lootBox = await _context.LootBoxDigitalItems
@@ -95,5 +107,7 @@ namespace Service.Implementations.LootBoxRepositories
                 LootBoxItems = lootBox
             };
         }
+
+        #endregion
     }
 }
