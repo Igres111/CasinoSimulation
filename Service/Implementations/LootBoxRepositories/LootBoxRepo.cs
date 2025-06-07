@@ -8,12 +8,13 @@ using DataAccess.Entities;
 using Dtos.LootBoxDto;
 using Microsoft.EntityFrameworkCore;
 using Service.Common;
+using Service.Common.LootBoxResponses;
 using Service.Interfaces.LootBoxInterfaces;
 
 namespace Service.Implementations.LootBoxRepositories
 {
-    public class LootBoxRepo : APIResponse<string>,ILootBox
-        
+    public class LootBoxRepo : ILootBox
+
     {
         public readonly AppDbContext _context;
         public LootBoxRepo(AppDbContext context)
@@ -58,7 +59,7 @@ namespace Service.Implementations.LootBoxRepositories
             };
         }
 
-        public async Task<APIResponse<List<GetAllLootBoxDto>>> GetAllLootBox()
+        public async Task<AllLootBoxResponse> GetAllLootBox()
         {
             var lootBoxes = await _context.LootBoxes
                 .Where(x => x.Delete == null)
@@ -71,12 +72,27 @@ namespace Service.Implementations.LootBoxRepositories
             }).ToListAsync();
             if(lootBoxes.Count == 0)
             {
-                return new APIResponse<List<GetAllLootBoxDto>> { Success = false, Error = "No loot boxes found." };
+                return new AllLootBoxResponse { Success = false, Error = "No loot boxes found." };
             }
-            return new APIResponse<List<GetAllLootBoxDto>>
+            return new AllLootBoxResponse
             {
                 Success = true,
-                Data = lootBoxes,
+                LootBoxes = lootBoxes,
+            };
+        }
+        public async Task<LootBoxItemsResponse> GetLootBoxItems(Guid lootBoxId)
+        {
+            var lootBox = await _context.LootBoxDigitalItems
+                .Where(el => el.LootBoxId == lootBoxId && el.LootBox.Delete == null)
+                .ToListAsync();
+            if (lootBox.Count == 0)
+            {
+                return new LootBoxItemsResponse { Success = false, Error = "No items found in this loot box." };
+            }
+            return new LootBoxItemsResponse
+            {
+                Success = true,
+                LootBoxItems = lootBox
             };
         }
     }

@@ -13,6 +13,7 @@ namespace DataAccess.Context
         public DbSet<TransactionHistory> TransactionHistories { get; set; }
         public DbSet<RefreshToken> RefreshTokens { get; set; }
         public DbSet<LootBox> LootBoxes { get; set; }
+        public DbSet<LootBoxDigitalItem> LootBoxDigitalItems { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<DigitalItems>()
