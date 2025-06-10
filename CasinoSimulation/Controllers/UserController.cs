@@ -34,6 +34,10 @@ namespace CasinoSimulation.Controllers
                 return BadRequest("Wrong credentials");
             }
             var result = await _userMethods.CreateUser(userInfo);
+            if (!result.Success)
+            {
+                return BadRequest(result.Error);
+            }
             return Ok(result);
         }
 
@@ -45,6 +49,10 @@ namespace CasinoSimulation.Controllers
                 return BadRequest("Wrong credentials");
             }
             var result = await _userMethods.LogInUser(userInfo);
+            if (!result.Success)
+            {
+                return BadRequest(result.Error);
+            }
             return Ok(result);
         }
 
@@ -55,6 +63,16 @@ namespace CasinoSimulation.Controllers
             return Ok(result);
         }
 
+        [HttpPost("gamble")]
+        public async Task<IActionResult> Gamble(UserGambleDto betInfo)
+        {
+            var result = await _userMethods.UserGamble(betInfo);
+            if (!result.Success)
+            {
+                return BadRequest(result.Error);
+            }
+            return Ok(result);
+        }
         #endregion
     }
 }

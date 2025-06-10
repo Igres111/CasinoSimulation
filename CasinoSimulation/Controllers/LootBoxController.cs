@@ -17,18 +17,30 @@ namespace CasinoSimulation.Controllers
         public async Task<IActionResult> CreateLootBox(CreateLootBoxDto lootInfo)
         {
             var result = await _lootBoxMethods.CreateLootBox(lootInfo);
+            if (!result.Success)
+            {
+                return BadRequest(result.Error);
+            }
             return Ok(result);
         }
         [HttpGet]
         public async Task<IActionResult> GetAllLootBox()
         {
             var result = await _lootBoxMethods.GetAllLootBox();
+            if (!result.Success)
+            {
+                return BadRequest(result.Error);
+            }
             return Ok(result);
         }
         [HttpGet("{lootBoxId}/items")]
         public async Task<IActionResult> GetLootBoxItems(Guid lootBoxId)
         {
             var result = await _lootBoxMethods.GetLootBoxItems(lootBoxId);
+            if (!result.Success)
+            {
+                return BadRequest(result.Error);
+            }
             return Ok(result);
         }
     }

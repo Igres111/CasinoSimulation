@@ -1,4 +1,4 @@
-﻿using DataAccess.Entities;
+﻿ using DataAccess.Entities;
 
 public class LootBoxDigitalItem
 {

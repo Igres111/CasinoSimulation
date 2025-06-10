@@ -14,6 +14,7 @@ namespace DataAccess.Context
         public DbSet<RefreshToken> RefreshTokens { get; set; }
         public DbSet<LootBox> LootBoxes { get; set; }
         public DbSet<LootBoxDigitalItem> LootBoxDigitalItems { get; set; }
+        public DbSet<Inventory> Inventories { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<DigitalItems>()
@@ -38,6 +39,12 @@ namespace DataAccess.Context
                 .HasOne(rt => rt.User)
                 .WithMany(u => u.RefreshTokens)
                 .HasForeignKey(rt => rt.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Inventory>()
+                .HasOne(d => d.User)
+                .WithMany(u => u.Inventories)
+                .HasForeignKey(d => d.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<LootBoxDigitalItem>()

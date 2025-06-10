@@ -1,6 +1,7 @@
 ﻿using Dtos.DigitalItemDto;
 using Microsoft.AspNetCore.Mvc;
 using Service.Interfaces.DigitalItemsInterfaces;
+using Sprache;
 
 namespace CasinoSimulation.Controllers
 {
@@ -22,7 +23,7 @@ namespace CasinoSimulation.Controllers
         #region Methods
 
         //[Authorize(Roles = "Admin")]
-        [HttpGet("GetAll")]
+        [HttpGet]
         public async Task<IActionResult> GetAllDigitalItems()
         {
             var items = await _digitalMethods.GetAllDigitalItems();
@@ -38,6 +39,10 @@ namespace CasinoSimulation.Controllers
                 return BadRequest(ModelState);
             }
             var result = await _digitalMethods.CreateDigitalItem(digitalItem);
+            if (!result.Success)
+            {
+                return BadRequest(result.Error);
+            }
             return Ok(result);
         }
 

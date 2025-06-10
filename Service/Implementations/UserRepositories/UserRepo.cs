@@ -4,12 +4,13 @@ using Dtos.UserDtos;
 using Microsoft.EntityFrameworkCore;
 using Service.AuthToken;
 using Service.Common;
+using Service.Common.UserResponses;
 using Service.Interfaces.TokenInterfaces;
 using Service.Interfaces.UserInterfaces;
 
 namespace Service.Implementations.UserRepositories
 {
-    public class UserRepo : APIResponse<string>, IUser
+    public class UserRepo : IUser
     {
         #region Fields
         public readonly AppDbContext _context;
@@ -64,6 +65,78 @@ namespace Service.Implementations.UserRepositories
             var accessToken = _tokenLogic.CreateAccessToken(userExists);
             await _context.SaveChangesAsync();
             return new APIResponse<string> { Success = true, Data = accessToken };
+        }
+
+        public async Task<GambledItemResponse> UserGamble(UserGambleDto betInfo)
+        {
+            var userExists = await _context.Users
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.Id == betInfo.UserId && x.Delete == null);
+            var lootBoxExists = await _context.LootBoxes
+                .AsNoTracking()
+                .Include(x => x.LootBoxDigitalItems)
+                .ThenInclude(x => x.DigitalItem)
+                .FirstOrDefaultAsync(x => x.Id == betInfo.LootBoxId && x.Delete == null);
+
+            if (userExists == null || lootBoxExists == null)
+            {
+                return new GambledItemResponse { Success = false, Error = "User or LootBox doesn't Exist" };
+            }
+
+            if(userExists.Balance < lootBoxExists.Price)
+            {
+                return new GambledItemResponse { Success = false, Error = "User is out of balance" };
+            }
+
+            if (lootBoxExists.Quantity <= 0)
+            {
+                return new GambledItemResponse { Success = false, Error = "LootBox is out of stock" };
+            }
+
+            var totalRatio = lootBoxExists.LootBoxDigitalItems.Sum(x => x.DigitalItem.RNG_Ratio);
+            Random rng = new Random();
+            var roll = (decimal)rng.NextDouble() * totalRatio;
+            decimal cumulative = 0;
+            foreach (var item in lootBoxExists.LootBoxDigitalItems)
+            {
+                cumulative += item.DigitalItem.RNG_Ratio;
+                if (roll < cumulative)
+                {
+                    var addInInventory = new Inventory
+                    {
+                        UserId = userExists.Id,
+                        DigitalItemId = item.DigitalItemId,
+                        CreatedAt = DateTime.UtcNow,
+                        Quantity = 1
+                    };
+                    var transactionHistory = new TransactionHistory
+                    {
+                        UserId = userExists.Id,
+                        ItemId = item.DigitalItemId,
+                        CreatedAt = DateTime.UtcNow,
+                        Price = lootBoxExists.Price,
+                    };
+                    _context.Inventories.Add(addInInventory);
+                    _context.TransactionHistories.Add(transactionHistory);
+                    await _context.SaveChangesAsync();
+                    return new GambledItemResponse { Success= true, DigitalItem = new UserGambledItemDto 
+                    {
+                        ItemId = item.DigitalItem.Id,
+                        Name = item.DigitalItem.Name,
+                        Description = item.DigitalItem.Description,
+                        ImageUrl = item.DigitalItem.ImageUrl,
+                        Category = item.DigitalItem.Category,
+                        SellPrice = item.DigitalItem.SellPrice,
+                        Color = item.DigitalItem.Color,
+                        Rarity = item.DigitalItem.Rarity,
+                        Code = item.DigitalItem.Code,
+                        StoreProvider = item.DigitalItem.StoreProvider,
+                        UserId = userExists.Id
+                    },
+                    } ;
+                }
+            }
+            return new GambledItemResponse { Success = false, Error = "No item won. Something went wrong" };
         }
 
         #endregion

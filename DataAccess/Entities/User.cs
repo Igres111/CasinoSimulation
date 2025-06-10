@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace DataAccess.Entities
+﻿namespace DataAccess.Entities
 {
-    public class User: BaseEntity
+    public class User : BaseEntity
     {
         public Guid Id { get; set; }
         public string FirstName { get; set; } = string.Empty;
@@ -23,5 +17,6 @@ namespace DataAccess.Entities
         public List<TransactionHistory> TransactionHistories { get; set; } = new List<TransactionHistory>();
         public List<RefreshToken> RefreshTokens { get; set; }
         public List<LootBox> LootBoxes { get; set; } = new List<LootBox>();
+        public List<Inventory> Inventories { get; set; } = new List<Inventory>();
     }
 }

@@ -7,7 +7,7 @@ using Service.Interfaces.DigitalItemsInterfaces;
 
 namespace Service.Implementations.DigitalItemsRepositories
 {
-    public class DigitalItemsRepo : APIResponse<string>, IDigitalItems
+    public class DigitalItemsRepo : IDigitalItems
     {
         #region Fields
         public readonly AppDbContext _context;
