@@ -116,6 +116,11 @@ namespace Service.Implementations.UserRepositories
                         CreatedAt = DateTime.UtcNow,
                         Price = lootBoxExists.Price,
                     };
+                    userExists.Balance -= lootBoxExists.Price;
+                    userExists.TotalBoxesOpened += 1;
+                    lootBoxExists.Quantity -= 1;
+                    _context.Users.Update(userExists);
+                    _context.LootBoxes.Update(lootBoxExists);
                     _context.Inventories.Add(addInInventory);
                     _context.TransactionHistories.Add(transactionHistory);
                     await _context.SaveChangesAsync();
