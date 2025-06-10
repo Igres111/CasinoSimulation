@@ -8,8 +8,8 @@
         public string Email { get; set; } = string.Empty;
         public string Password { get; set; } = string.Empty;
         public string Role { get; set; } = string.Empty;
-        string? PreferredLanguage { get; set; }
-        string? AvatarUrl { get; set; }
+        public string? PreferredLanguage { get; set; }
+        public string? AvatarUrl { get; set; }
         public int TotalBoxesOpened { get; set; }
         public decimal Balance { get; set; }
         public int BonusPoints { get; set; }

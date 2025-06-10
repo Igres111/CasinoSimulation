@@ -56,17 +56,28 @@ namespace CasinoSimulation.Controllers
             return Ok(result);
         }
 
-        [HttpPost("refresh-access-token")]
+        [HttpPost("Refresh-access-token")]
         public async Task<IActionResult> RefreshToken(string token)
         {
             var result = await _tokenLogic.RefreshAccessTokenAsync(token);
             return Ok(result);
         }
 
-        [HttpPost("gamble")]
+        [HttpPost("Gamble")]
         public async Task<IActionResult> Gamble(UserGambleDto betInfo)
         {
             var result = await _userMethods.UserGamble(betInfo);
+            if (!result.Success)
+            {
+                return BadRequest(result.Error);
+            }
+            return Ok(result);
+        }
+
+        [HttpGet("Profile")]
+        public async Task<IActionResult> UserProfile(Guid Id)
+        {
+            var result = await _userMethods.UserProfile(Id);
             if (!result.Success)
             {
                 return BadRequest(result.Error);

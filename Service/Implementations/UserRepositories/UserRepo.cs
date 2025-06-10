@@ -2,8 +2,8 @@
 using DataAccess.Entities;
 using Dtos.UserDtos;
 using Microsoft.EntityFrameworkCore;
-using Service.AuthToken;
 using Service.Common;
+using Service.Common.LootBoxResponses;
 using Service.Common.UserResponses;
 using Service.Interfaces.TokenInterfaces;
 using Service.Interfaces.UserInterfaces;
@@ -32,7 +32,7 @@ namespace Service.Implementations.UserRepositories
             var existUser = _context.Users.FirstOrDefault(u => u.Email == userInfo.Email && u.Delete == null);
             if (existUser != null)
             {
-               return new APIResponse<string> { Success = false, Error = "User already exists" };
+                return new APIResponse<string> { Success = false, Error = "User already exists" };
             }
             var newUser = new User
             {
@@ -83,7 +83,7 @@ namespace Service.Implementations.UserRepositories
                 return new GambledItemResponse { Success = false, Error = "User or LootBox doesn't Exist" };
             }
 
-            if(userExists.Balance < lootBoxExists.Price)
+            if (userExists.Balance < lootBoxExists.Price)
             {
                 return new GambledItemResponse { Success = false, Error = "User is out of balance" };
             }
@@ -119,26 +119,56 @@ namespace Service.Implementations.UserRepositories
                     _context.Inventories.Add(addInInventory);
                     _context.TransactionHistories.Add(transactionHistory);
                     await _context.SaveChangesAsync();
-                    return new GambledItemResponse { Success= true, DigitalItem = new UserGambledItemDto 
+                    return new GambledItemResponse
                     {
-                        ItemId = item.DigitalItem.Id,
-                        Name = item.DigitalItem.Name,
-                        Description = item.DigitalItem.Description,
-                        ImageUrl = item.DigitalItem.ImageUrl,
-                        Category = item.DigitalItem.Category,
-                        SellPrice = item.DigitalItem.SellPrice,
-                        Color = item.DigitalItem.Color,
-                        Rarity = item.DigitalItem.Rarity,
-                        Code = item.DigitalItem.Code,
-                        StoreProvider = item.DigitalItem.StoreProvider,
-                        UserId = userExists.Id
-                    },
-                    } ;
+                        Success = true,
+                        DigitalItem = new UserGambledItemDto
+                        {
+                            ItemId = item.DigitalItem.Id,
+                            Name = item.DigitalItem.Name,
+                            Description = item.DigitalItem.Description,
+                            ImageUrl = item.DigitalItem.ImageUrl,
+                            Category = item.DigitalItem.Category,
+                            SellPrice = item.DigitalItem.SellPrice,
+                            Color = item.DigitalItem.Color,
+                            Rarity = item.DigitalItem.Rarity,
+                            Code = item.DigitalItem.Code,
+                            StoreProvider = item.DigitalItem.StoreProvider,
+                            UserId = userExists.Id
+                        },
+                    };
                 }
             }
             return new GambledItemResponse { Success = false, Error = "No item won. Something went wrong" };
         }
 
-        #endregion
+        public async Task<UserProfileResponse> UserProfile(Guid UserId)
+        {
+            var userExist = await _context.Users
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.Id == UserId && x.Delete == null);
+            if (userExist == null)
+            {
+                return new UserProfileResponse
+                {
+                    Success = false,
+                    Error = "User does not exist"
+                };
+            };
+
+            var userProfile = new UserProfileDto
+            {
+                Id = userExist.Id,
+                FirstName = userExist.FirstName,
+                LastName = userExist.LastName,
+                Balance = userExist.Balance,
+                BonusPoints = userExist.BonusPoints,
+                PreferredLanguage = userExist.PreferredLanguage,
+                AvatarUrl = userExist.AvatarUrl,
+                TotalBoxesOpened = userExist.TotalBoxesOpened
+            };
+            return new UserProfileResponse { Success = true, UserProfile = userProfile };
+        }
     }
+    #endregion
 }
