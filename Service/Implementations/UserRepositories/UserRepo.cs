@@ -70,10 +70,8 @@ namespace Service.Implementations.UserRepositories
         public async Task<GambledItemResponse> UserGamble(UserGambleDto betInfo)
         {
             var userExists = await _context.Users
-                .AsNoTracking()
                 .FirstOrDefaultAsync(x => x.Id == betInfo.UserId && x.Delete == null);
             var lootBoxExists = await _context.LootBoxes
-                .AsNoTracking()
                 .Include(x => x.LootBoxDigitalItems)
                 .ThenInclude(x => x.DigitalItem)
                 .FirstOrDefaultAsync(x => x.Id == betInfo.LootBoxId && x.Delete == null);
@@ -159,7 +157,8 @@ namespace Service.Implementations.UserRepositories
                     Success = false,
                     Error = "User does not exist"
                 };
-            };
+            }
+            ;
 
             var userProfile = new UserProfileDto
             {
@@ -173,6 +172,52 @@ namespace Service.Implementations.UserRepositories
                 TotalBoxesOpened = userExist.TotalBoxesOpened
             };
             return new UserProfileResponse { Success = true, UserProfile = userProfile };
+        }
+        public async Task<InventoryItemsResponse> UserInventory(Guid UserId)
+        {
+            var userExist = await _context.Users
+                .Where(x => x.Id == UserId && x.Delete == null)
+                .Include(i => i.Inventories)
+                .ThenInclude(i => i.DigitalItem)
+                .FirstOrDefaultAsync(x => x.Id == UserId && x.Delete == null);
+            if (userExist == null)
+            {
+               return new InventoryItemsResponse
+                {
+                    Success = false,
+                    Error = "User does not exist"
+                };
+            }
+
+            var inventoryItems = userExist.Inventories
+                .Select(item => item.DigitalItem)
+                .Select(u => new UserInventoryDto
+                {
+                    Id = u.Id,
+                    Name = u.Name,
+                    Description = u.Description,
+                    Category = u.Category,
+                    ImageUrl = u.ImageUrl,
+                    SellPrice = u.SellPrice,
+                    Color = u.Color,
+                    Rarity = u.Rarity,
+                    Code = u.Code,
+                    StoreProvider = u.StoreProvider
+                }).ToList();
+            if(inventoryItems.Count == 0)
+            {
+                return new InventoryItemsResponse
+                {
+                    Success = false,
+                    Error = "User inventory is empty"
+                };
+            }
+            return new InventoryItemsResponse
+            {
+                Success = true,
+                Data = "User inventory items retrieved successfully",
+                InventoryItems = inventoryItems
+            };
         }
     }
     #endregion

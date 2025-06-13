@@ -17,5 +17,6 @@ namespace Service.Interfaces.UserInterfaces
         public Task<APIResponse<string>> LogInUser(LogInUserDto userInfo);
         public Task<GambledItemResponse> UserGamble(UserGambleDto betInfo);
         public Task<UserProfileResponse> UserProfile(Guid UserId);
+        public Task<InventoryItemsResponse> UserInventory(Guid UserId);
     }
 }

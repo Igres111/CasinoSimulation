@@ -84,6 +84,16 @@ namespace CasinoSimulation.Controllers
             }
             return Ok(result);
         }
+        [HttpGet("Inventory")]
+        public async Task<IActionResult> UserInventory(Guid Id)
+        {
+            var result = await _userMethods.UserInventory(Id);
+            if (!result.Success)
+            {
+                return BadRequest(result.Error);
+            }
+            return Ok(result);
+        }
         #endregion
     }
 }
