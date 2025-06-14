@@ -31,7 +31,7 @@ namespace CasinoSimulation.Controllers
         {
             if (!ModelState.IsValid)
             {
-                return BadRequest("Wrong credentials");
+                return BadRequest(ModelState);
             }
             var result = await _userMethods.CreateUser(userInfo);
             if (!result.Success)
@@ -46,7 +46,7 @@ namespace CasinoSimulation.Controllers
         {
             if(!ModelState.IsValid)
             {
-                return BadRequest("Wrong credentials");
+                return BadRequest(ModelState);
             }
             var result = await _userMethods.LogInUser(userInfo);
             if (!result.Success)
@@ -74,6 +74,21 @@ namespace CasinoSimulation.Controllers
             return Ok(result);
         }
 
+        [HttpPost("SellItem")]
+        public async Task<IActionResult> SellItem(SellItemDto itemInfo)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            var result = await _userMethods.SellItem(itemInfo);
+            if (!result.Success)
+            {
+                return BadRequest(result.Error);
+            }
+            return Ok(result);
+        }
+
         [HttpGet("Profile")]
         public async Task<IActionResult> UserProfile(Guid Id)
         {
@@ -84,6 +99,7 @@ namespace CasinoSimulation.Controllers
             }
             return Ok(result);
         }
+
         [HttpGet("Inventory")]
         public async Task<IActionResult> UserInventory(Guid Id)
         {
@@ -94,6 +110,7 @@ namespace CasinoSimulation.Controllers
             }
             return Ok(result);
         }
+
         #endregion
     }
 }

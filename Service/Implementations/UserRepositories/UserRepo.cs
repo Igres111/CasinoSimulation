@@ -91,56 +91,82 @@ namespace Service.Implementations.UserRepositories
                 return new GambledItemResponse { Success = false, Error = "LootBox is out of stock" };
             }
 
+            using var transaction = await _context.Database.BeginTransactionAsync();
+
+
             var totalRatio = lootBoxExists.LootBoxDigitalItems.Sum(x => x.DigitalItem.RNG_Ratio);
             Random rng = new Random();
             var roll = (decimal)rng.NextDouble() * totalRatio;
             decimal cumulative = 0;
-            foreach (var item in lootBoxExists.LootBoxDigitalItems)
+            try
             {
-                cumulative += item.DigitalItem.RNG_Ratio;
-                if (roll < cumulative)
+                foreach (var item in lootBoxExists.LootBoxDigitalItems)
                 {
-                    var addInInventory = new Inventory
+                    cumulative += item.DigitalItem.RNG_Ratio;
+                    if (roll < cumulative)
                     {
-                        UserId = userExists.Id,
-                        DigitalItemId = item.DigitalItemId,
-                        CreatedAt = DateTime.UtcNow,
-                        Quantity = 1
-                    };
-                    var transactionHistory = new TransactionHistory
-                    {
-                        UserId = userExists.Id,
-                        ItemId = item.DigitalItemId,
-                        CreatedAt = DateTime.UtcNow,
-                        Price = lootBoxExists.Price,
-                    };
-                    userExists.Balance -= lootBoxExists.Price;
-                    userExists.TotalBoxesOpened += 1;
-                    lootBoxExists.Quantity -= 1;
-                    _context.Users.Update(userExists);
-                    _context.LootBoxes.Update(lootBoxExists);
-                    _context.Inventories.Add(addInInventory);
-                    _context.TransactionHistories.Add(transactionHistory);
-                    await _context.SaveChangesAsync();
-                    return new GambledItemResponse
-                    {
-                        Success = true,
-                        DigitalItem = new UserGambledItemDto
+                        var addInInventory = new Inventory
                         {
-                            ItemId = item.DigitalItem.Id,
-                            Name = item.DigitalItem.Name,
-                            Description = item.DigitalItem.Description,
-                            ImageUrl = item.DigitalItem.ImageUrl,
-                            Category = item.DigitalItem.Category,
-                            SellPrice = item.DigitalItem.SellPrice,
-                            Color = item.DigitalItem.Color,
-                            Rarity = item.DigitalItem.Rarity,
-                            Code = item.DigitalItem.Code,
-                            StoreProvider = item.DigitalItem.StoreProvider,
-                            UserId = userExists.Id
-                        },
-                    };
+                            UserId = userExists.Id,
+                            DigitalItemId = item.DigitalItemId,
+                            CreatedAt = DateTime.UtcNow,
+                            Quantity = 1
+                        };
+                        var transactionHistory = new TransactionHistory
+                        {
+                            UserId = userExists.Id,
+                            ItemId = item.DigitalItemId,
+                            CreatedAt = DateTime.UtcNow,
+                            Price = lootBoxExists.Price,
+                        };
+                        userExists.Balance -= lootBoxExists.Price;
+                        userExists.TotalBoxesOpened += 1;
+                        lootBoxExists.Quantity -= 1;
+                        _context.Users.Update(userExists);
+                        _context.LootBoxes.Update(lootBoxExists);
+                        var itemExists = await _context.Inventories
+                            .FirstOrDefaultAsync(x => x.UserId == userExists.Id && x.DigitalItemId == item.DigitalItemId && x.Delete == null);
+                        if (itemExists == null)
+                        {
+                            _context.Inventories.Add(addInInventory);
+                        }
+                        else
+                        {
+                            itemExists.Quantity += betInfo.Quantity;
+                        }
+                        _context.TransactionHistories.Add(transactionHistory);
+                        await _context.SaveChangesAsync();
+                        await transaction.CommitAsync();
+                        return new GambledItemResponse
+                        {
+                            Success = true,
+                            DigitalItem = new UserGambledItemDto
+                            {
+                                ItemId = item.DigitalItem.Id,
+                                Name = item.DigitalItem.Name,
+                                Description = item.DigitalItem.Description,
+                                ImageUrl = item.DigitalItem.ImageUrl,
+                                Category = item.DigitalItem.Category,
+                                SellPrice = item.DigitalItem.SellPrice,
+                                Color = item.DigitalItem.Color,
+                                Rarity = item.DigitalItem.Rarity,
+                                Code = item.DigitalItem.Code,
+                                StoreProvider = item.DigitalItem.StoreProvider,
+                                UserId = userExists.Id
+                            },
+                        };
+                    }
                 }
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                return new GambledItemResponse
+                {
+                    Success = false,
+                    Error = "An error occurred during the transaction."
+
+                };
             }
             return new GambledItemResponse { Success = false, Error = "No item won. Something went wrong" };
         }
@@ -182,7 +208,7 @@ namespace Service.Implementations.UserRepositories
                 .FirstOrDefaultAsync(x => x.Id == UserId && x.Delete == null);
             if (userExist == null)
             {
-               return new InventoryItemsResponse
+                return new InventoryItemsResponse
                 {
                     Success = false,
                     Error = "User does not exist"
@@ -204,7 +230,7 @@ namespace Service.Implementations.UserRepositories
                     Code = u.Code,
                     StoreProvider = u.StoreProvider
                 }).ToList();
-            if(inventoryItems.Count == 0)
+            if (inventoryItems.Count == 0)
             {
                 return new InventoryItemsResponse
                 {
@@ -218,6 +244,77 @@ namespace Service.Implementations.UserRepositories
                 Data = "User inventory items retrieved successfully",
                 InventoryItems = inventoryItems
             };
+        }
+        public async Task<APIResponse<string>> SellItem(SellItemDto itemInfo)
+        {
+            var userExist = await _context.Users
+                .FirstOrDefaultAsync(x => x.Id == itemInfo.UserId && x.Delete == null);
+            if (userExist == null)
+            {
+                return new APIResponse<string>
+                {
+                    Success = false,
+                    Error = "User does not exist"
+                };
+            }
+
+            var itemExist = await _context.Inventories
+                .Include(x => x.DigitalItem)
+                .FirstOrDefaultAsync(u => u.UserId == itemInfo.UserId && u.DigitalItemId == itemInfo.ItemId && u.Delete == null);
+
+            if (itemExist == null)
+            {
+                return new APIResponse<string>
+                {
+                    Success = false,
+                    Error = "Item does not exist in user's inventory"
+                };
+            }
+            if (itemExist.Quantity < itemInfo.Quantity)
+            {
+                return new APIResponse<string>
+                {
+                    Success = false,
+                    Error = "Not enough items to withdraw"
+                };
+            }
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                itemExist.Quantity -= itemInfo.Quantity;
+                userExist.Balance += itemExist.DigitalItem.SellPrice * itemInfo.Quantity;
+                if(itemExist.Quantity == 0)
+                {
+                    itemExist.Delete = DateTime.UtcNow;
+                } else
+                {
+                    itemExist.UpdatedAt = DateTime.UtcNow;
+                }
+                    var transHistory = await _context.TransactionHistories
+                    .AddAsync(new TransactionHistory
+                    {
+                        UserId = userExist.Id,
+                        ItemId = itemExist.DigitalItemId,
+                        CreatedAt = DateTime.UtcNow,
+                        Price = itemExist.DigitalItem.SellPrice * itemInfo.Quantity,
+                    });
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+                return new APIResponse<string>
+                {
+                    Success = true,
+                    Data = "Item withdrawn successfully",
+                };
+            }
+            catch 
+            {
+                await transaction.RollbackAsync();
+                return new APIResponse<string>
+                {
+                    Success = false,
+                    Error = "An error occurred during the transaction."
+                };
+            }
         }
     }
     #endregion
