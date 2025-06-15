@@ -125,6 +125,17 @@ namespace CasinoSimulation.Controllers
             }
             return Ok(result);
         }
+
+        [HttpDelete("DeleteProfile")]
+        public async Task<IActionResult> DeleteProfile(Guid UserId)
+        {
+            var result = await _userMethods.DeleteProfile(UserId);
+            if (!result.Success)
+            {
+                return BadRequest(result.Error);
+            }
+            return Ok(result);
+        }
         #endregion
     }
 }

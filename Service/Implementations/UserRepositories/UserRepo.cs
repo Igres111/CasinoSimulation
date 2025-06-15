@@ -347,6 +347,27 @@ namespace Service.Implementations.UserRepositories
                 Data = "User profile updated successfully"
             };
         }
+        public async Task<APIResponse<string>> DeleteProfile(Guid UserId)
+        {
+            var userExist = await _context.Users
+                .FirstOrDefaultAsync(x => x.Id == UserId && x.Delete == null);
+            if (userExist == null)
+            {
+                return new APIResponse<string>
+                {
+                    Success = false,
+                    Error = "User does not exist"
+                };
+            }
+            userExist.Delete = DateTime.UtcNow;
+            _context.Users.Update(userExist);
+            await _context.SaveChangesAsync();
+            return new APIResponse<string>
+            {
+                Success = true,
+                Data = "User profile deleted successfully"
+            };
+        }
     }
     #endregion
 }
