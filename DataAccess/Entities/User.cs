@@ -12,8 +12,7 @@
         public string? AvatarUrl { get; set; }
         public int TotalBoxesOpened { get; set; }
         public decimal Balance { get; set; }
-        public int BonusPoints { get; set; }
-        public List<DigitalItems> DigitalItems { get; set; } = new List<DigitalItems>();
+        public int BonusPoints { get; set; }       
         public List<TransactionHistory> TransactionHistories { get; set; } = new List<TransactionHistory>();
         public List<RefreshToken> RefreshTokens { get; set; }
         public List<LootBox> LootBoxes { get; set; } = new List<LootBox>();

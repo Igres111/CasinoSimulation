@@ -50,7 +50,6 @@ namespace Service.Implementations.UserRepositories
         public async Task<APIResponse<string>> LogInUser(LogInUserDto userInfo)
         {
             var userExists = await _context.Users
-                .AsNoTracking()
                 .FirstOrDefaultAsync(x => x.Email == userInfo.Email);
             if (userExists == null)
             {
@@ -119,6 +118,7 @@ namespace Service.Implementations.UserRepositories
                             CreatedAt = DateTime.UtcNow,
                             Price = lootBoxExists.Price,
                         };
+                        userExists.BonusPoints += item.DigitalItem.BonusPoints;
                         userExists.Balance -= lootBoxExists.Price;
                         userExists.TotalBoxesOpened += 1;
                         lootBoxExists.Quantity -= 1;
@@ -216,20 +216,22 @@ namespace Service.Implementations.UserRepositories
             }
 
             var inventoryItems = userExist.Inventories
-                .Select(item => item.DigitalItem)
-                .Select(u => new UserInventoryDto
-                {
-                    Id = u.Id,
-                    Name = u.Name,
-                    Description = u.Description,
-                    Category = u.Category,
-                    ImageUrl = u.ImageUrl,
-                    SellPrice = u.SellPrice,
-                    Color = u.Color,
-                    Rarity = u.Rarity,
-                    Code = u.Code,
-                    StoreProvider = u.StoreProvider
-                }).ToList();
+                .Where(x => x.Delete == null && x.Quantity > 0)
+                .SelectMany(item => Enumerable.Range(0, item.Quantity)
+                    .Select(_ => new UserInventoryDto
+                    {
+                        Id = item.DigitalItem.Id,
+                        Name = item.DigitalItem.Name,
+                        Description = item.DigitalItem.Description,
+                        Category = item.DigitalItem.Category,
+                        ImageUrl = item.DigitalItem.ImageUrl,
+                        SellPrice = item.DigitalItem.SellPrice,
+                        Color = item.DigitalItem.Color,
+                        Rarity = item.DigitalItem.Rarity,
+                        Code = item.DigitalItem.Code,
+                        StoreProvider = item.DigitalItem.StoreProvider,
+                    }))
+                .ToList();
             if (inventoryItems.Count == 0)
             {
                 return new InventoryItemsResponse
@@ -283,21 +285,22 @@ namespace Service.Implementations.UserRepositories
             {
                 itemExist.Quantity -= itemInfo.Quantity;
                 userExist.Balance += itemExist.DigitalItem.SellPrice * itemInfo.Quantity;
-                if(itemExist.Quantity == 0)
+                if (itemExist.Quantity == 0)
                 {
                     itemExist.Delete = DateTime.UtcNow;
-                } else
+                }
+                else
                 {
                     itemExist.UpdatedAt = DateTime.UtcNow;
                 }
-                    var transHistory = await _context.TransactionHistories
-                    .AddAsync(new TransactionHistory
-                    {
-                        UserId = userExist.Id,
-                        ItemId = itemExist.DigitalItemId,
-                        CreatedAt = DateTime.UtcNow,
-                        Price = itemExist.DigitalItem.SellPrice * itemInfo.Quantity,
-                    });
+                var transHistory = await _context.TransactionHistories
+                .AddAsync(new TransactionHistory
+                {
+                    UserId = userExist.Id,
+                    ItemId = itemExist.DigitalItemId,
+                    CreatedAt = DateTime.UtcNow,
+                    Price = itemExist.DigitalItem.SellPrice * itemInfo.Quantity,
+                });
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();
                 return new APIResponse<string>
@@ -306,7 +309,7 @@ namespace Service.Implementations.UserRepositories
                     Data = "Item withdrawn successfully",
                 };
             }
-            catch 
+            catch
             {
                 await transaction.RollbackAsync();
                 return new APIResponse<string>

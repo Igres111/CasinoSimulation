@@ -15,5 +15,6 @@ namespace DataAccess.Entities
         public string Category { get; set; } = string.Empty;
         public string ImageUrl { get; set; } = string.Empty;
         public decimal SellPrice { get; set; }
+        public int BonusPoints { get; set; } 
     }
 }

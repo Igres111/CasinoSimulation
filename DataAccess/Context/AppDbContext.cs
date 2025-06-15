@@ -17,11 +17,6 @@ namespace DataAccess.Context
         public DbSet<Inventory> Inventories { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<DigitalItems>()
-                .HasOne(d => d.User)
-                .WithMany(u => u.DigitalItems)
-                .HasForeignKey(d => d.UserId)
-                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<TransactionHistory>()
                 .HasOne(th => th.User)
