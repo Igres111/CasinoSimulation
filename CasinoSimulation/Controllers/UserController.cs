@@ -111,6 +111,20 @@ namespace CasinoSimulation.Controllers
             return Ok(result);
         }
 
+        [HttpPut("UpdateProfile")]
+        public async Task<IActionResult> UpdateProfile(UpdateProfileDto userInfo)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            var result = await _userMethods.UpdateProfile(userInfo);
+            if (!result.Success)
+            {
+                return BadRequest(result.Error);
+            }
+            return Ok(result);
+        }
         #endregion
     }
 }

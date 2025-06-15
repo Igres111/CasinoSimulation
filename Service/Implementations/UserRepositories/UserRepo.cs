@@ -2,6 +2,7 @@
 using DataAccess.Entities;
 using Dtos.UserDtos;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Service.Common;
 using Service.Common.LootBoxResponses;
 using Service.Common.UserResponses;
@@ -318,6 +319,33 @@ namespace Service.Implementations.UserRepositories
                     Error = "An error occurred during the transaction."
                 };
             }
+        }
+        public async Task<APIResponse<string>> UpdateProfile(UpdateProfileDto userInfo)
+        {
+            var userExist = await _context.Users
+                .FirstOrDefaultAsync(x => x.Id == userInfo.UserId && x.Delete == null);
+            if (userExist == null)
+            {
+                return new APIResponse<string>
+                {
+                    Success = false,
+                    Error = "User does not exist"
+                };
+            }
+
+            userExist.FirstName = string.IsNullOrEmpty(userInfo.FirstName) ? userExist.FirstName : userInfo.FirstName;
+            userExist.LastName = string.IsNullOrEmpty(userInfo.LastName) ? userExist.LastName : userInfo.LastName;
+            userExist.Email = string.IsNullOrEmpty(userInfo.Email) ? userExist.Email : userInfo.Email;
+            userExist.PreferredLanguage = string.IsNullOrEmpty(userInfo.PreferredLanguage) ? userExist.PreferredLanguage : userInfo.PreferredLanguage;
+            userExist.AvatarUrl = string.IsNullOrEmpty(userInfo.AvatarUrl) ? userExist.AvatarUrl : userInfo.AvatarUrl;
+            userExist.UpdatedAt = DateTime.UtcNow;
+            _context.Users.Update(userExist);
+            await _context.SaveChangesAsync();
+            return new APIResponse<string>
+            {
+                Success = true,
+                Data = "User profile updated successfully"
+            };
         }
     }
     #endregion

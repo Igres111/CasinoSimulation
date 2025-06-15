@@ -19,5 +19,6 @@ namespace Service.Interfaces.UserInterfaces
         public Task<UserProfileResponse> UserProfile(Guid UserId);
         public Task<InventoryItemsResponse> UserInventory(Guid UserId);
         public Task<APIResponse<string>> SellItem(SellItemDto itemInfo);
+        public Task<APIResponse<string>> UpdateProfile(UpdateProfileDto userInfo);
     }
 }
