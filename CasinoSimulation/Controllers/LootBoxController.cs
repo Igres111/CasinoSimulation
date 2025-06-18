@@ -43,5 +43,19 @@ namespace CasinoSimulation.Controllers
             }
             return Ok(result);
         }
+        [HttpPut("Update")]
+        public async Task<IActionResult> UpdateLootBox([FromBody] UpdateLootBox updateInfo)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            var result = await _lootBoxMethods.UpdateLootBox(updateInfo);
+            if (!result.Success)
+            {
+                return BadRequest(result.Error);
+            }
+            return Ok(result);
+        }
     }
 }

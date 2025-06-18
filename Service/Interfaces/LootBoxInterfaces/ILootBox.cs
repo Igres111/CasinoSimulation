@@ -14,5 +14,6 @@ namespace Service.Interfaces.LootBoxInterfaces
         public Task<APIResponse<string>> CreateLootBox(CreateLootBoxDto lootInfo);
         public Task<AllLootBoxResponse> GetAllLootBox();
         public Task<LootBoxItemsResponse> GetLootBoxItems(Guid lootBoxId);
+        public Task<APIResponse<string>> UpdateLootBox(UpdateLootBox updateInfo);
     }
 }

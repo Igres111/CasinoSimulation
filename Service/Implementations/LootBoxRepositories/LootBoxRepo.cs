@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using DataAccess.Context;
+﻿using DataAccess.Context;
 using DataAccess.Entities;
 using Dtos.LootBoxDto;
 using Microsoft.EntityFrameworkCore;
@@ -108,6 +103,69 @@ namespace Service.Implementations.LootBoxRepositories
             };
         }
 
+        public async Task<APIResponse<string>> UpdateLootBox(UpdateLootBox updateInfo)
+        {
+            var lootBoxExist = await _context.LootBoxes.FirstOrDefaultAsync(x => x.Id == updateInfo.LootBoxId && x.Delete == null);
+            if (lootBoxExist == null)
+            {
+                return new APIResponse<string> { Success = false, Error = "LootBox does not exist." };
+            }
+            var digitalItemExists = await _context.DigitalItems.AnyAsync(x => x.Id == updateInfo.NewItemId && x.Delete == null);
+            if (!digitalItemExists)
+            {
+                return new APIResponse<string> { Success = false, Error = "Digital item does not exist." };
+            }
+            if (!string.IsNullOrEmpty(updateInfo.Name))
+            {
+                lootBoxExist.Name = updateInfo.Name;
+            }
+            lootBoxExist.Price = updateInfo.Price == 0 ? lootBoxExist.Price : updateInfo.Price;
+            lootBoxExist.Quantity = updateInfo.Quantity == 0 ? lootBoxExist.Quantity : updateInfo.Quantity;
+            lootBoxExist.UpdatedAt = DateTime.UtcNow;
+            if (updateInfo.Swap == true)
+            {
+                var instanceToChange = await _context.LootBoxDigitalItems
+                    .FirstOrDefaultAsync(x => x.DigitalItemId == updateInfo.OldItemId && x.LootBoxId == updateInfo.LootBoxId);
+                if (instanceToChange != null)
+                {
+                    _context.LootBoxDigitalItems.Remove(instanceToChange);
+                    await _context.SaveChangesAsync();
+
+                    instanceToChange.DigitalItemId = updateInfo.NewItemId;
+                    _context.LootBoxDigitalItems.Add(instanceToChange);
+                }
+                else
+                {
+                    return new APIResponse<string> { Success = false, Error = "Old item not found in the LootBox." };
+                }
+            }
+            else
+            {
+                var itemExists = await _context.LootBoxDigitalItems
+                    .AnyAsync(x => x.DigitalItemId == updateInfo.NewItemId && x.LootBoxId == updateInfo.LootBoxId);
+                if (!itemExists)
+                {
+
+                    var newLootBoxDigitalItem = new LootBoxDigitalItem
+                    {
+                        LootBoxId = lootBoxExist.Id,
+                        DigitalItemId = updateInfo.NewItemId
+                    };
+                    _context.LootBoxDigitalItems.Add(newLootBoxDigitalItem);
+                    await _context.SaveChangesAsync();
+                }
+                else
+                {
+                    return new APIResponse<string> { Success = false, Error = "Item already exists in the loot box." };
+                }
+
+            }
+            return new APIResponse<string>
+            {
+                Success = true,
+                Data = "LootBox updated successfully."
+            };
+        }
         #endregion
     }
 }
