@@ -57,5 +57,15 @@ namespace CasinoSimulation.Controllers
             }
             return Ok(result);
         }
+        [HttpDelete("{lootBoxId}")]
+        public async Task<IActionResult> DeleteLootBox(Guid lootBoxId)
+        {
+            var result = await _lootBoxMethods.DeleteLootBox(lootBoxId);
+            if (!result.Success)
+            {
+                return BadRequest(result.Error);
+            }
+            return Ok(result);
+        }
     }
 }

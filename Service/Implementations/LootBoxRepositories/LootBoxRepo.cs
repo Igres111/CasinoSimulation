@@ -166,6 +166,23 @@ namespace Service.Implementations.LootBoxRepositories
                 Data = "LootBox updated successfully."
             };
         }
+
+        public async Task<APIResponse<string>> DeleteLootBox(Guid lootBoxId)
+        {
+            var lootBoxExist = await _context.LootBoxes.FirstOrDefaultAsync(x => x.Id == lootBoxId && x.Delete == null);
+            if (lootBoxExist == null)
+            {
+                return new APIResponse<string> { Success = false, Error = "LootBox does not exist." };
+            }
+            lootBoxExist.Delete = DateTime.UtcNow;
+            _context.LootBoxes.Update(lootBoxExist);
+            await _context.SaveChangesAsync();
+            return new APIResponse<string>
+            {
+                Success = true,
+                Data = "LootBox deleted successfully."
+            };
+        }
         #endregion
     }
 }
