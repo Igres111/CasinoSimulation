@@ -89,6 +89,18 @@ namespace Service.Implementations.DigitalItemsRepositories
             return new APIResponse<string> { Success = true, Data = "Digital item updated successfully." };
         }
 
+        public async Task<APIResponse<string>> DeleteItem(Guid itemId)
+        {
+            var item = await _context.DigitalItems.FirstOrDefaultAsync(x => x.Id == itemId && x.Delete == null);
+            if (item == null)
+            {
+                return new APIResponse<string> { Success = false, Error = "Digital item not found." };
+            }
+            item.Delete = DateTime.UtcNow;
+            _context.DigitalItems.Update(item);
+            await _context.SaveChangesAsync();
+            return new APIResponse<string> { Success = true, Data = "Digital item deleted successfully." };
+        }
         #endregion
     }
 }

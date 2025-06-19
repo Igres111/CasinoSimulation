@@ -60,6 +60,16 @@ namespace CasinoSimulation.Controllers
             }
             return Ok(result);
         }
+        [HttpDelete("{itemId}")]
+        public async Task<IActionResult> DeleteItem(Guid itemId)
+        {
+            var result = await _digitalMethods.DeleteItem(itemId);
+            if (!result.Success)
+            {
+                return BadRequest(result.Error);
+            }
+            return Ok(result);
+        }
         #endregion
     }
 }
