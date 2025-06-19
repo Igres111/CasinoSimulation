@@ -3,6 +3,7 @@ using DataAccess.Entities;
 using Dtos.DigitalItemDto;
 using Microsoft.EntityFrameworkCore;
 using Service.Common;
+using Service.Common.DigitalItemsResponses;
 using Service.Interfaces.DigitalItemsInterfaces;
 
 namespace Service.Implementations.DigitalItemsRepositories
@@ -56,14 +57,14 @@ namespace Service.Implementations.DigitalItemsRepositories
             };
         }
 
-        public async Task<APIResponse<List<DigitalItems>>> GetAllDigitalItems()
+        public async Task<DigitalItemsResponse> GetAllDigitalItems()
         {
             var items = await _context.DigitalItems.Where(x => x.Delete == null).ToListAsync();
             if (items == null || items.Count == 0)
             {
-                return new APIResponse<List<DigitalItems>> { Success = false, Error = "No digital items found." };
+                return new DigitalItemsResponse { Success = false, Error = "No digital items found." };
             }
-            return new APIResponse<List<DigitalItems>> { Success = true, Data = items };
+            return new DigitalItemsResponse { Success = true, DigitalItems = items };
         }
 
         public async Task<APIResponse<string>> UpdateItem(UpdateItemDto updateItemDto)
