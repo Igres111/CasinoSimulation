@@ -33,7 +33,7 @@ namespace CasinoSimulation.Controllers
             }
             return Ok(result);
         }
-        [HttpGet("{lootBoxId}/items")]
+        [HttpGet("items/{lootBoxId}")]
         public async Task<IActionResult> GetLootBoxItems(Guid lootBoxId)
         {
             var result = await _lootBoxMethods.GetLootBoxItems(lootBoxId);

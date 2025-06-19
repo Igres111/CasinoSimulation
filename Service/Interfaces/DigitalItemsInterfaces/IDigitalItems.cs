@@ -13,5 +13,6 @@ namespace Service.Interfaces.DigitalItemsInterfaces
     {
         public Task<APIResponse<string>> CreateDigitalItem(CreateDigitalItemsDto digitalItem);
         public Task<APIResponse<List<DigitalItems>>> GetAllDigitalItems();
+        public Task<APIResponse<string>> UpdateItem(UpdateItemDto itemInfo);
     }
 }

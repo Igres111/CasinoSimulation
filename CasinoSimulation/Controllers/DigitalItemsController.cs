@@ -46,6 +46,20 @@ namespace CasinoSimulation.Controllers
             return Ok(result);
         }
 
+        [HttpPut("Update")]
+        public async Task<IActionResult> UpdateItem(UpdateItemDto itemInfo)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            var result = await _digitalMethods.UpdateItem(itemInfo);
+            if (!result.Success)
+            {
+                return BadRequest(result.Error);
+            }
+            return Ok(result);
+        }
         #endregion
     }
 }
